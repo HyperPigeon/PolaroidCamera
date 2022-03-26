@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "polaroidcamera",
+  "version": "${version}",
+  "name": "PolaroidCamera",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/polaroidcamera/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.hyper_pigeon.polaroidcamera.client.PolaroidCameraClient"
+    ],
+    "main": [
+      "net.hyper_pigeon.polaroidcamera.PolaroidCamera"
+    ]
+  },
+  "mixins": [
+    "polaroidcamera.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "fabric": "*",
+    "minecraft": "1.16.4"
+  }
+}
