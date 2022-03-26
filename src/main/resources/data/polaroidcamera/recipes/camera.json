@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IRI",
+    "QGQ",
+    "IRI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "R": {
+      "item": "minecraft:redstone_dust"
+    },
+    "Q": {
+      "item:": "minecraft:quartz"
+    }
+  },
+  "result": {
+    "item": "polaroidcamera:camera",
+    "count": 1
+  }
+}
