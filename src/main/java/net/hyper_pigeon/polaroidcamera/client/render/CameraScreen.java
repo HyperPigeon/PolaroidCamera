@@ -39,8 +39,6 @@ public class CameraScreen extends Screen {
         UUID imageId = UUID.randomUUID();
         if(keyCode == GLFW.GLFW_KEY_C){
 
-            System.out.println("test2");
-
             boolean isHUDhidden = client.options.hudHidden;
             client.options.hudHidden = true;
             NativeImage nativeImage = ScreenshotUtils.takeScreenshot(client.getWindow().getWidth(), client.getWindow().getHeight(), client.getFramebuffer());

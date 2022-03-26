@@ -35,7 +35,6 @@ public class PolaroidCamera implements ModInitializer {
 
         ServerPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.SEND_IMAGE_BYTES, ((server, player, handler, buf, responseSender) ->
         {
-            System.out.println("test3");
             String identifier = buf.readString();
             byte[] bytes = buf.readByteArray();
             ImagePersistentState imagePersistentState = ImagePersistentState.get(player.getServerWorld());

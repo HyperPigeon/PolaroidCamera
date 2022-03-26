@@ -16,7 +16,6 @@ public class CameraItem extends Item {
 
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
-        System.out.println("test1");
 
         if (world.isClient()){
             openCameraScreen(world,user,hand);

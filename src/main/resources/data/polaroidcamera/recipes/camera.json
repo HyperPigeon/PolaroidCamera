@@ -13,10 +13,10 @@
       "item": "minecraft:glass"
     },
     "R": {
-      "item": "minecraft:redstone_dust"
+      "item": "minecraft:redstone"
     },
     "Q": {
-      "item:": "minecraft:quartz"
+      "item": "minecraft:quartz"
     }
   },
   "result": {
