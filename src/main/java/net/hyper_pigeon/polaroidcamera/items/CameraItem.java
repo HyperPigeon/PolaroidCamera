@@ -30,7 +30,7 @@ public class CameraItem extends Item {
         MinecraftClient mc = MinecraftClient.getInstance();
 
         if (!(mc.currentScreen instanceof CameraScreen)) {
-            mc.openScreen(new CameraScreen(mc.options.fov, world));
+            mc.setScreen(new CameraScreen(mc.options.fov, world));
         }
     }
 }

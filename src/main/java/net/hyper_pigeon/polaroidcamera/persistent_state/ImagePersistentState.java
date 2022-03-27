@@ -1,41 +1,48 @@
 package net.hyper_pigeon.polaroidcamera.persistent_state;
 
-import net.minecraft.nbt.CompoundTag;
+
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.PersistentState;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Iterator;
 
 public class ImagePersistentState extends PersistentState {
     private HashMap<String, byte[]> imageTextures = new HashMap<>();
+    public final String key;
 
     public ImagePersistentState(String key) {
-        super(key);
+        super();
+        this.key = key;
     }
 
     public ImagePersistentState(){
         this("ImageInfo");
     }
 
-    @Override
-    public void fromTag(CompoundTag tag) {
-        CompoundTag compoundTag = tag.getCompound("images");
+
+    public static ImagePersistentState readNbt(NbtCompound tag) {
+
+        ImagePersistentState imagePersistentState = new ImagePersistentState();
+        NbtCompound compoundTag = tag.getCompound("images");
 
         Iterator var3 = compoundTag.getKeys().iterator();
 
         while(var3.hasNext()) {
             String string = (String)var3.next();
-            this.imageTextures.put(string, compoundTag.getByteArray(string));
+            imagePersistentState.imageTextures.put(string, compoundTag.getByteArray(string));
         }
 
-        this.markDirty();
+        imagePersistentState.markDirty();
+        return imagePersistentState;
     }
 
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
-        CompoundTag compoundTag = new CompoundTag();
+    public NbtCompound writeNbt(NbtCompound tag) {
+        NbtCompound compoundTag = new NbtCompound();
 
         this.imageTextures.forEach((string, bytes) -> {
             compoundTag.putByteArray(string,bytes);
@@ -67,7 +74,9 @@ public class ImagePersistentState extends PersistentState {
     }
 
     public static ImagePersistentState get(ServerWorld world) {
-        return world.getPersistentStateManager().getOrCreate(() -> new ImagePersistentState("ImageInfo"), "ImageInfo");
+        return (ImagePersistentState) world.getPersistentStateManager().getOrCreate((nbtCompound) -> {
+            return readNbt(nbtCompound);
+        },ImagePersistentState::new, "ImageInfo");
     }
 
     public int getSize(){

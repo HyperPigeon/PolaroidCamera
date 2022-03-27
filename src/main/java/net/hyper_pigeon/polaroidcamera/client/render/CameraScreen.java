@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.ScreenshotUtils;
+import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
@@ -41,7 +41,7 @@ public class CameraScreen extends Screen {
 
             boolean isHUDhidden = client.options.hudHidden;
             client.options.hudHidden = true;
-            NativeImage nativeImage = ScreenshotUtils.takeScreenshot(client.getWindow().getWidth(), client.getWindow().getHeight(), client.getFramebuffer());
+            NativeImage nativeImage = ScreenshotRecorder.takeScreenshot(client.getFramebuffer());
 
             client.options.hudHidden = isHUDhidden;
             NativeImageBackedTexture nativeImageBackedTexture = new NativeImageBackedTexture(nativeImage);
@@ -87,16 +87,16 @@ public class CameraScreen extends Screen {
 //            }
         }
         if(keyCode == GLFW.GLFW_KEY_W){
-            this.client.player.pitch += 1;
+            this.client.player.setPitch(this.client.player.getPitch()+ 1);
         }
         if(keyCode ==  GLFW.GLFW_KEY_S){
-            this.client.player.pitch -= 1;
+            this.client.player.setPitch(this.client.player.getPitch()- 1);
         }
         if(keyCode ==  GLFW.GLFW_KEY_D){
-            this.client.player.yaw += 1;
+            this.client.player.setYaw(this.client.player.getYaw()+1);
         }
         if(keyCode ==  GLFW.GLFW_KEY_A){
-            this.client.player.yaw -= 1;
+            this.client.player.setYaw(this.client.player.getYaw()-1);
         }
         return super.keyPressed(keyCode,scanCode,modifiers);
     }

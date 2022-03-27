@@ -14,6 +14,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.registry.Registry;
+import space.essem.image2map.Image2Map;
 import space.essem.image2map.renderer.MapRenderer;
 
 import javax.imageio.ImageIO;
@@ -57,10 +58,10 @@ public class PolaroidCamera implements ModInitializer {
 
 
             server.execute(() -> {
-                if(player.inventory.contains(new ItemStack(Items.MAP)) || player.isCreative()) {
+                if(player.getInventory().contains(new ItemStack(Items.MAP)) || player.isCreative()) {
                     try {
                         BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(ImagePersistentState.get(player.getServerWorld()).getByteArray(identifier)));
-                        ItemStack mapItemStack = MapRenderer.render(bufferedImage, (ServerWorld) player.getEntityWorld(),
+                        ItemStack mapItemStack = MapRenderer.render(bufferedImage, Image2Map.DitherMode.FLOYD,(ServerWorld) player.getEntityWorld(),
                                 player.getX(), player.getZ(), player);
                         ItemEntity itemEntity = new ItemEntity(player.world, player.getPos().x, player.getPos().y, player.getPos().z, mapItemStack);
                         player.world.spawnEntity(itemEntity);
@@ -68,8 +69,8 @@ public class PolaroidCamera implements ModInitializer {
                         e.printStackTrace();
                     }
                     if(!player.isCreative()) {
-                        int slot = player.inventory.getSlotWithStack((new ItemStack(Items.MAP)));
-                        player.inventory.removeStack(slot);
+                        int slot = player.getInventory().getSlotWithStack((new ItemStack(Items.MAP)));
+                        player.getInventory().removeStack(slot);
                     }
                 }
 
