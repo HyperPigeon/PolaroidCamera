@@ -61,6 +61,8 @@ public class PolaroidCamera implements ModInitializer {
                 if(player.getInventory().contains(new ItemStack(Items.MAP)) || player.isCreative()) {
                     try {
                         BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(ImagePersistentState.get(player.getServerWorld()).getByteArray(identifier)));
+                        bufferedImage = this.crop(bufferedImage,1080,1080);
+
                         ItemStack mapItemStack = MapRenderer.render(bufferedImage, Image2Map.DitherMode.FLOYD,(ServerWorld) player.getEntityWorld(),
                                 player.getX(), player.getZ(), player);
                         ItemEntity itemEntity = new ItemEntity(player.world, player.getPos().x, player.getPos().y, player.getPos().z, mapItemStack);
@@ -78,5 +80,23 @@ public class PolaroidCamera implements ModInitializer {
         });
 
 
+    }
+
+    public BufferedImage crop(BufferedImage bufferedImage,int targetWidth, int targetHeight) throws IOException {
+        int height = bufferedImage.getHeight();
+        int width = bufferedImage.getWidth();
+
+        // Coordinates of the image's middle
+        int xc = (width - targetWidth) / 2;
+        int yc = (height - targetHeight) / 2;
+
+        // Crop
+        BufferedImage croppedImage = bufferedImage.getSubimage(
+                xc,
+                yc,
+                targetWidth, // width
+                targetHeight // height
+        );
+        return croppedImage;
     }
 }
