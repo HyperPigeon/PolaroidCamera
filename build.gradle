@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
     id "com.jfrog.artifactory" version "4.15.2"
 }
@@ -49,9 +49,9 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "curse.maven:image2map-403656:3384105"
-    modApi "curse.maven:image2map-403656:3384105"
-    include "curse.maven:image2map-403656:3384105"
+//    modImplementation "curse.maven:image2map-403656:3384105"
+//    modApi "curse.maven:image2map-403656:3384105"
+//    include "curse.maven:image2map-403656:3384105"
 
     // Config library
     modApi ("me.shedaniel.cloth:cloth-config-fabric:4.11.26") { exclude module: 'fabric-api' }

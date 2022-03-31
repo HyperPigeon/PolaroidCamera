@@ -102,13 +102,13 @@ public class CameraScreen extends Screen {
     }
 
 
-    public boolean isPauseScreen() {
+    public boolean shouldPause() {
         return false;
     }
 
-    public void onClose() {
+    public void close() {
         this.client.options.hudHidden = false;
         this.client.options.fov = defaultFOV;
-        super.onClose();
+        super.close();
     }
 }

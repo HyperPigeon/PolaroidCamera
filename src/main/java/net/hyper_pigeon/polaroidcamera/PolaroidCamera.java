@@ -2,6 +2,8 @@ package net.hyper_pigeon.polaroidcamera;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.hyper_pigeon.image2map.Image2Map;
+import net.hyper_pigeon.image2map.renderer.MapRenderer;
 import net.hyper_pigeon.polaroidcamera.items.CameraItem;
 import net.hyper_pigeon.polaroidcamera.networking.PolaroidCameraNetworkingConstants;
 import net.hyper_pigeon.polaroidcamera.persistent_state.ImagePersistentState;
@@ -12,10 +14,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.registry.Registry;
-import space.essem.image2map.Image2Map;
-import space.essem.image2map.renderer.MapRenderer;
+
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -38,7 +38,7 @@ public class PolaroidCamera implements ModInitializer {
         {
             String identifier = buf.readString();
             byte[] bytes = buf.readByteArray();
-            ImagePersistentState imagePersistentState = ImagePersistentState.get(player.getServerWorld());
+            ImagePersistentState imagePersistentState = ImagePersistentState.get(player.getWorld());
             server.execute(() -> {
                 if (!imagePersistentState.containsID(identifier)){
                     imagePersistentState.addByteArray(identifier,bytes);
@@ -60,7 +60,7 @@ public class PolaroidCamera implements ModInitializer {
             server.execute(() -> {
                 if(player.getInventory().contains(new ItemStack(Items.MAP)) || player.isCreative()) {
                     try {
-                        BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(ImagePersistentState.get(player.getServerWorld()).getByteArray(identifier)));
+                        BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(ImagePersistentState.get(player.getWorld()).getByteArray(identifier)));
                         bufferedImage = this.crop(bufferedImage,1080,1080);
 
                         ItemStack mapItemStack = MapRenderer.render(bufferedImage, Image2Map.DitherMode.FLOYD,(ServerWorld) player.getEntityWorld(),
