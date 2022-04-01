@@ -61,7 +61,7 @@ public class PolaroidCamera implements ModInitializer {
                 if(player.getInventory().contains(new ItemStack(Items.MAP)) || player.isCreative()) {
                     try {
                         BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(ImagePersistentState.get(player.getWorld()).getByteArray(identifier)));
-                        bufferedImage = this.crop(bufferedImage,1080,1080);
+                        bufferedImage = this.crop(bufferedImage, bufferedImage.getHeight(), bufferedImage.getHeight());
 
                         ItemStack mapItemStack = MapRenderer.render(bufferedImage, Image2Map.DitherMode.FLOYD,(ServerWorld) player.getEntityWorld(),
                                 player.getX(), player.getZ(), player);
@@ -75,6 +75,7 @@ public class PolaroidCamera implements ModInitializer {
                         player.getInventory().removeStack(slot);
                     }
                 }
+                ImagePersistentState.get(player.getWorld()).removeByteArray(identifier);
 
             });
         });

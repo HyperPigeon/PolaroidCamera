@@ -69,6 +69,10 @@ public class ImagePersistentState extends PersistentState {
         return imageTextures.get(id);
     }
 
+    public void removeByteArray(String id){
+        imageTextures.remove(id);
+    }
+
     public void removeByteArray(String id,byte[] bytes){
         this.imageTextures.remove(id);
     }
