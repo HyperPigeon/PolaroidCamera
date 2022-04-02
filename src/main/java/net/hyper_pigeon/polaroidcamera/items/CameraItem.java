@@ -1,5 +1,7 @@
 package net.hyper_pigeon.polaroidcamera.items;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.hyper_pigeon.polaroidcamera.client.render.CameraScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,14 +23,12 @@ public class CameraItem extends Item {
             openCameraScreen(world,user,hand);
             return TypedActionResult.success(user.getStackInHand(hand));
         }
-        
-
         return TypedActionResult.success(user.getStackInHand(hand));
     }
 
+    @Environment(EnvType.CLIENT)
     private void openCameraScreen(World world, PlayerEntity user, Hand hand) {
         MinecraftClient mc = MinecraftClient.getInstance();
-
         if (!(mc.currentScreen instanceof CameraScreen)) {
             mc.setScreen(new CameraScreen(mc.options.fov, world));
         }
