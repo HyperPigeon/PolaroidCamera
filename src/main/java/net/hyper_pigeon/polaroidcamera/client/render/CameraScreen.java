@@ -32,6 +32,7 @@ public class CameraScreen extends Screen {
 
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.client.options.hudHidden = true;
+        super.render(matrices, mouseX, mouseY, delta);
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers){
