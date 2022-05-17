@@ -63,16 +63,16 @@ public class CameraScreen extends Screen {
                 byte[] imageBytes = nativeImage.getBytes();
                 //System.out.println("length: " + imageBytes.length);
 
-                for(int i = 0; i < imageBytes.length; i+=1000) {
+                for(int i = 0; i < imageBytes.length; i+=7500) {
                     PacketByteBuf packetByteBuf = PacketByteBufs.create();
-                    if(i+1000 >= imageBytes.length){
+                    if(i+7500 >= imageBytes.length){
                         packetByteBuf.writeString(String.valueOf(identifier));
                         packetByteBuf.writeVarInt(imageBytes.length-i);
                         packetByteBuf.writeBytes(Arrays.copyOfRange(imageBytes,i,imageBytes.length));
                     }
                     packetByteBuf.writeString(String.valueOf(identifier));
-                    packetByteBuf.writeVarInt(1000);
-                    packetByteBuf.writeBytes(Arrays.copyOfRange(imageBytes,i,i+1000));
+                    packetByteBuf.writeVarInt(7500);
+                    packetByteBuf.writeBytes(Arrays.copyOfRange(imageBytes,i,i+7500));
                     ClientPlayNetworking.send(PolaroidCameraNetworkingConstants.SEND_IMAGE_BYTES,packetByteBuf);
                 }
             } catch (IOException e) {
