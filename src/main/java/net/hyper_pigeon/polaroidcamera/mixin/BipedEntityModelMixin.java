@@ -26,7 +26,7 @@ public abstract class BipedEntityModelMixin {
     private void cameraLeftArmPoses(LivingEntity livingEntity, CallbackInfo ci){
         if(livingEntity.getMainHandStack().getItem() == PolaroidCamera.CAMERA_ITEM) {
             leftArm.roll = 0;
-            leftArm.yaw = 0.15F + this.head.yaw;;
+            leftArm.yaw = 0.16F + this.head.yaw + 0.4F;
             leftArm.pitch = -1.5707964F + this.head.pitch;
         }
     }

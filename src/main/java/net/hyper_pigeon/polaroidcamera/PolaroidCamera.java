@@ -72,7 +72,7 @@ public class PolaroidCamera implements ModInitializer {
                     }
                     if(!player.isCreative()) {
                         int slot = player.getInventory().getSlotWithStack((new ItemStack(Items.MAP)));
-                        player.getInventory().removeStack(slot);
+                        player.getInventory().getStack(slot).decrement(1);
                     }
                 }
                 ImagePersistentState.get(player.getWorld()).removeByteArray(identifier);
