@@ -87,10 +87,10 @@ public class CameraScreen extends Screen {
 //            }
         }
         if(keyCode == GLFW.GLFW_KEY_W){
-            this.client.player.setPitch(this.client.player.getPitch()+ 1);
+            this.client.player.setPitch(this.client.player.getPitch()- 1);
         }
         if(keyCode ==  GLFW.GLFW_KEY_S){
-            this.client.player.setPitch(this.client.player.getPitch()- 1);
+            this.client.player.setPitch(this.client.player.getPitch()+ 1);
         }
         if(keyCode ==  GLFW.GLFW_KEY_D){
             this.client.player.setYaw(this.client.player.getYaw()+1);
