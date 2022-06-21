@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.hyper_pigeon.polaroidcamera.networking.PolaroidCameraNetworkingConstants;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.option.SimpleOption;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.util.NarratorManager;
@@ -21,12 +22,14 @@ import java.util.UUID;
 public class CameraScreen extends Screen {
     public final double defaultFOV;
     public double currentFOV;
+    public double currentZoom;
     private World world;
 
     public CameraScreen(double fov, World world) {
         super(NarratorManager.EMPTY);
         defaultFOV = fov;
         currentFOV = defaultFOV;
+        currentZoom = 1;
         this.world = world;
     }
 
@@ -108,7 +111,7 @@ public class CameraScreen extends Screen {
 
     public void close() {
         this.client.options.hudHidden = false;
-        this.client.options.fov = defaultFOV;
+        this.client.options.getFovEffectScale().setValue(defaultFOV);
         super.close();
     }
 }

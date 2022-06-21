@@ -31,7 +31,7 @@ public class CameraItem extends Item {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (!(mc.currentScreen instanceof CameraScreen)) {
             mc.options.hudHidden = true;
-            mc.setScreen(new CameraScreen(mc.options.fov, world));
+            mc.setScreen(new CameraScreen(mc.options.getFov().getValue(), world));
         }
         mc.options.hudHidden = true;
     }
