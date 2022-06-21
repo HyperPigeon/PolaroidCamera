@@ -4,11 +4,12 @@
   "package": "net.hyper_pigeon.polaroidcamera.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MouseMixin"
   ],
   "client": [
+    "BipedEntityModelMixin",
     "InGameHudMixin",
-    "BipedEntityModelMixin"
+    "MouseMixin",
+    "GameRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
