@@ -81,6 +81,34 @@ public class MapRenderer {
         return stack;
     }
 
+    public static MapState render(BufferedImage image, Image2Map.DitherMode mode, int id, MapState state) {
+        // mojang removed the ability to set a map as locked via the "locked" field in
+        // 1.17, so we create and apply our own MapState instead
+
+//        ItemStack stack = new ItemStack(Items.FILLED_MAP);
+//        stack.getOrCreateNbt().putInt("map", id);
+
+        Image resizedImage = image.getScaledInstance(128, 128, Image.SCALE_DEFAULT);
+        BufferedImage resized = convertToBufferedImage(resizedImage);
+        int width = resized.getWidth();
+        int height = resized.getHeight();
+        int[][] pixels = convertPixelArray(resized);
+        MapColor[] mapColors = getColors();
+        Color imageColor;
+        mapColors = Arrays.stream(mapColors).filter(Objects::nonNull).toArray(MapColor[]::new);
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                imageColor = new Color(pixels[j][i], true);
+                if (mode.equals(Image2Map.DitherMode.FLOYD))
+                    state.colors[i + j * width] = (byte) floydDither(mapColors, pixels, i, j, imageColor);
+                else
+                    state.colors[i + j * width] = (byte) nearestColor(mapColors, imageColor);
+            }
+        }
+        return state;
+    }
+
     private static Color mapColorToRGBColor(MapColor[] colors, int color) {
         Color mcColor = new Color(colors[color >> 2].color);
         double[] mcColorVec = { (double) mcColor.getRed(), (double) mcColor.getGreen(), (double) mcColor.getBlue() };

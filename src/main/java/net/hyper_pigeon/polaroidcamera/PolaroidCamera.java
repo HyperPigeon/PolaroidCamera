@@ -1,27 +1,19 @@
 package net.hyper_pigeon.polaroidcamera;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.hyper_pigeon.image2map.Image2Map;
-import net.hyper_pigeon.image2map.renderer.MapRenderer;
 import net.hyper_pigeon.polaroidcamera.items.CameraItem;
 import net.hyper_pigeon.polaroidcamera.networking.PolaroidCameraNetworkingConstants;
-import net.hyper_pigeon.polaroidcamera.persistent_state.ImagePersistentState;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.item.*;
+import net.minecraft.item.map.MapState;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.UUID;
+import java.util.Objects;
 
 public class PolaroidCamera implements ModInitializer {
 
@@ -33,71 +25,59 @@ public class PolaroidCamera implements ModInitializer {
 
         Registry.register(Registry.ITEM,new Identifier("polaroidcamera", "camera"), CAMERA_ITEM);
 
+        ServerPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.CREATE_MAP_STATE, ((server, player, handler, buf, responseSender) -> {
 
-        ServerPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.SEND_IMAGE_BYTES, ((server, player, handler, buf, responseSender) ->
-        {
-            String identifier = buf.readString();
-            byte[] bytes = buf.readByteArray();
-            ImagePersistentState imagePersistentState = ImagePersistentState.get(player.getWorld());
             server.execute(() -> {
-                if (!imagePersistentState.containsID(identifier)){
-                    imagePersistentState.addByteArray(identifier,bytes);
-                }
-                else {
-                    imagePersistentState.appendByteArray(identifier,bytes);
-                }
-            });
+                int id = player.getEntityWorld().getNextMapId();
+                NbtCompound nbt = new NbtCompound();
+                nbt.putString("dimension", player.getEntityWorld().getRegistryKey().getValue().toString());
+                nbt.putInt("xCenter", (int) player.getX());
+                nbt.putInt("zCenter", (int) player.getZ());
+                nbt.putBoolean("locked", true);
+                nbt.putBoolean("unlimitedTracking", false);
+                nbt.putBoolean("trackingPosition", false);
+                nbt.putByte("scale", (byte) 3);
+                MapState state = MapState.fromNbt(nbt);
+
+                //player.getEntityWorld().putMapState(FilledMapItem.getMapName(id), state);
+
+                NbtCompound nbtCompound = new NbtCompound();
+                nbtCompound = state.writeNbt(nbtCompound);
+
+                PacketByteBuf packetByteBuf = PacketByteBufs.create();
+
+                packetByteBuf.writeInt(id);
+                packetByteBuf.writeNbt(nbtCompound);
+
+                ServerPlayNetworking.send(player,PolaroidCameraNetworkingConstants.CREATE_PICTURE,packetByteBuf);
+                });
         }));
 
-        ServerPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.SEND_SCREENSHOT_IMAGE, (server,player, handler, buf, responseSender) -> {
+        ServerPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.SPAWN_PICTURE, ((server, player, handler, buf, responseSender) -> {
 
-            UUID imageId = buf.readUuid();
-            int width = (int) buf.readDouble();
-            int height = (int) buf.readFloat();
-            String identifier = buf.readString(32767);
-
+            int mapId = buf.readInt();
+            MapState mapState = MapState.fromNbt(Objects.requireNonNull(buf.readNbt()));
 
             server.execute(() -> {
-                if(player.getInventory().contains(new ItemStack(Items.MAP)) || player.isCreative()) {
-                    try {
-                        BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(ImagePersistentState.get(player.getWorld()).getByteArray(identifier)));
-                        bufferedImage = this.crop(bufferedImage, bufferedImage.getHeight(), bufferedImage.getHeight());
 
-                        ItemStack mapItemStack = MapRenderer.render(bufferedImage, Image2Map.DitherMode.FLOYD,(ServerWorld) player.getEntityWorld(),
-                                player.getX(), player.getZ(), player);
-                        ItemEntity itemEntity = new ItemEntity(player.world, player.getPos().x, player.getPos().y, player.getPos().z, mapItemStack);
-                        player.world.spawnEntity(itemEntity);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    if(!player.isCreative()) {
-                        int slot = player.getInventory().getSlotWithStack((new ItemStack(Items.MAP)));
-                        player.getInventory().getStack(slot).decrement(1);
-                    }
+                ItemStack stack = new ItemStack(Items.FILLED_MAP);
+                player.getEntityWorld().putMapState(FilledMapItem.getMapName(mapId),mapState);
+                stack.getOrCreateNbt().putInt("map", mapId);
+
+                ItemEntity itemEntity = new ItemEntity(player.world, player.getPos().x, player.getPos().y, player.getPos().z, stack);
+                player.world.spawnEntity(itemEntity);
+
+                if(!player.isCreative()) {
+                    int slot = player.getInventory().getSlotWithStack((new ItemStack(Items.MAP)));
+                    player.getInventory().getStack(slot).decrement(1);
                 }
-                ImagePersistentState.get(player.getWorld()).removeByteArray(identifier);
-
             });
-        });
+
+
+        }));
 
 
     }
 
-    public BufferedImage crop(BufferedImage bufferedImage,int targetWidth, int targetHeight) throws IOException {
-        int height = bufferedImage.getHeight();
-        int width = bufferedImage.getWidth();
 
-        // Coordinates of the image's middle
-        int xc = (width - targetWidth) / 2;
-        int yc = (height - targetHeight) / 2;
-
-        // Crop
-        BufferedImage croppedImage = bufferedImage.getSubimage(
-                xc,
-                yc,
-                targetWidth, // width
-                targetHeight // height
-        );
-        return croppedImage;
-    }
 }

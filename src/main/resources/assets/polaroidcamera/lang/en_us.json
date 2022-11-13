@@ -1,3 +1,4 @@
 {
-  "item.polaroidcamera.camera":"Camera"
+  "item.polaroidcamera.camera":"Camera",
+  "key.polaroid_camera.take_picture": "Take Picture"
 }
