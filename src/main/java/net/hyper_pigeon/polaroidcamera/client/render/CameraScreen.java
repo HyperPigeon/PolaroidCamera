@@ -57,7 +57,8 @@ public class CameraScreen extends Screen {
 
     public void close() {
         this.client.options.hudHidden = false;
-        this.client.options.getFovEffectScale().setValue(defaultFOV);
+        this.client.options.getFov().setValue((int) defaultFOV);
+        //this.client.options.getFovEffectScale().setValue(defaultFOV);
         super.close();
     }
 
