@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.hyper_pigeon.polaroidcamera.client.PolaroidCameraClient;
 import net.hyper_pigeon.polaroidcamera.networking.PolaroidCameraNetworkingConstants;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.math.MatrixStack;
@@ -25,9 +26,9 @@ public class CameraScreen extends Screen {
         this.world = world;
     }
 
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.client.options.hudHidden = true;
-        super.render(matrices, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers){

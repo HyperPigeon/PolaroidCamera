@@ -73,13 +73,13 @@ public class PolaroidCamera implements ModInitializer {
                     if(slot != -1) {
                         player.getInventory().getStack(slot).decrement(1);
 
-                        ItemEntity itemEntity = new ItemEntity(player.world, player.getPos().x, player.getPos().y, player.getPos().z, stack);
-                        player.world.spawnEntity(itemEntity);
+                        ItemEntity itemEntity = new ItemEntity(player.getServerWorld(), player.getPos().x, player.getPos().y, player.getPos().z, stack);
+                        player.getServerWorld().spawnEntity(itemEntity);
                     }
                 }
                 else {
-                    ItemEntity itemEntity = new ItemEntity(player.world, player.getPos().x, player.getPos().y, player.getPos().z, stack);
-                    player.world.spawnEntity(itemEntity);
+                    ItemEntity itemEntity = new ItemEntity(player.getServerWorld(), player.getPos().x, player.getPos().y, player.getPos().z, stack);
+                    player.getServerWorld().spawnEntity(itemEntity);
                 }
 
             });

@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.hyper_pigeon.polaroidcamera.client.render.CameraScreen;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Final;
@@ -20,7 +21,7 @@ public abstract class InGameHudMixin {
 
     @Environment(EnvType.CLIENT)
     @Inject(at = {@At("HEAD")},method = {"render"}, cancellable = true)
-    private void renderCameraScreenWithoutHud(MatrixStack matrices, float tickDelta, CallbackInfo ci){
+    private void renderCameraScreenWithoutHud(DrawContext drawContext, float tickDelta, CallbackInfo ci){
        if(this.client.currentScreen instanceof CameraScreen){
            ci.cancel();
        }
