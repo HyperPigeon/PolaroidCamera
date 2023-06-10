@@ -6,24 +6,28 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.hyper_pigeon.polaroidcamera.items.CameraItem;
 import net.hyper_pigeon.polaroidcamera.networking.PolaroidCameraNetworkingConstants;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.FilledMapItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.Objects;
 
 public class PolaroidCamera implements ModInitializer {
 
 
-    public static final CameraItem CAMERA_ITEM = new CameraItem(new Item.Settings().maxCount(1).group(ItemGroup.MISC));
+    public static final CameraItem CAMERA_ITEM = new CameraItem(new Item.Settings().maxCount(1));
 
     @Override
     public void onInitialize() {
 
-        Registry.register(Registry.ITEM,new Identifier("polaroidcamera", "camera"), CAMERA_ITEM);
+        Registry.register(Registries.ITEM,new Identifier("polaroidcamera", "camera"), CAMERA_ITEM);
 
         ServerPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.CREATE_MAP_STATE, ((server, player, handler, buf, responseSender) -> {
 
@@ -64,13 +68,20 @@ public class PolaroidCamera implements ModInitializer {
                 player.getEntityWorld().putMapState(FilledMapItem.getMapName(mapId),mapState);
                 stack.getOrCreateNbt().putInt("map", mapId);
 
-                ItemEntity itemEntity = new ItemEntity(player.world, player.getPos().x, player.getPos().y, player.getPos().z, stack);
-                player.world.spawnEntity(itemEntity);
-
                 if(!player.isCreative()) {
                     int slot = player.getInventory().getSlotWithStack((new ItemStack(Items.MAP)));
-                    player.getInventory().getStack(slot).decrement(1);
+                    if(slot != -1) {
+                        player.getInventory().getStack(slot).decrement(1);
+
+                        ItemEntity itemEntity = new ItemEntity(player.world, player.getPos().x, player.getPos().y, player.getPos().z, stack);
+                        player.world.spawnEntity(itemEntity);
+                    }
                 }
+                else {
+                    ItemEntity itemEntity = new ItemEntity(player.world, player.getPos().x, player.getPos().y, player.getPos().z, stack);
+                    player.world.spawnEntity(itemEntity);
+                }
+
             });
 
 
