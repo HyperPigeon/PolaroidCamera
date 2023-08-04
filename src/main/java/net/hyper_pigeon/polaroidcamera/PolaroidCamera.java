@@ -1,15 +1,13 @@
 package net.hyper_pigeon.polaroidcamera;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.hyper_pigeon.polaroidcamera.items.CameraItem;
 import net.hyper_pigeon.polaroidcamera.networking.PolaroidCameraNetworkingConstants;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -28,6 +26,10 @@ public class PolaroidCamera implements ModInitializer {
     public void onInitialize() {
 
         Registry.register(Registries.ITEM,new Identifier("polaroidcamera", "camera"), CAMERA_ITEM);
+
+        ItemGroupEvents
+                .modifyEntriesEvent(ItemGroups.TOOLS)
+                .register((itemGroup) -> itemGroup.add(PolaroidCamera.CAMERA_ITEM));
 
         ServerPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.CREATE_MAP_STATE, ((server, player, handler, buf, responseSender) -> {
 
