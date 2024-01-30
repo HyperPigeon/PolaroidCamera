@@ -30,7 +30,7 @@ public class PolaroidCameraClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
 
-        TAKE_PICTURE_KEY = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.polaroid_camera.take_picture", InputUtil.Type.KEYSYM,
+        TAKE_PICTURE_KEY = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.polaroidcamera.take_picture", InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_C, "Polaroid Camera"));
 
         ClientPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.CREATE_PICTURE,(client, handler, buf, responseSender) -> {
