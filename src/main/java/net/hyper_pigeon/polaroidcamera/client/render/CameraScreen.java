@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.hyper_pigeon.polaroidcamera.client.PolaroidCameraClient;
 import net.hyper_pigeon.polaroidcamera.networking.PolaroidCameraNetworkingConstants;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.navigation.GuiNavigationPath;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.network.PacketByteBuf;
@@ -59,6 +60,10 @@ public class CameraScreen extends Screen {
         this.client.options.hudHidden = false;
         this.client.options.getFov().setValue((int) defaultFOV);
         super.close();
+    }
+
+    public void renderInGameBackground(DrawContext context) {
+
     }
 
 }
