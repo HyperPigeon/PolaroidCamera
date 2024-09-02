@@ -35,17 +35,34 @@ public class PolaroidCamera implements ModInitializer {
         PayloadTypeRegistry.playC2S().register(CreateMapStatePayload.PACKET_ID, CreateMapStatePayload.PACKET_CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(CreateMapStatePayload.PACKET_ID, (payload, context) -> {
-            var world = context.player().getServerWorld();
+            var player = context.player();
+            var world = player.getServerWorld();
             NbtCompound nbtCompound = payload.imageNBT();
             MapState mapState = MapState.fromNbt(nbtCompound,world.getRegistryManager());
 
             ItemStack stack = new ItemStack(Items.FILLED_MAP);
             MapIdComponent mapIdComponent = world.increaseAndGetMapId();
-            context.player().getEntityWorld().putMapState(mapIdComponent,mapState);
+            player.getEntityWorld().putMapState(mapIdComponent,mapState);
             stack.set(DataComponentTypes.MAP_ID, mapIdComponent);
 
-            ItemEntity itemEntity = new ItemEntity(context.player().getServerWorld(), context.player().getPos().x, context.player().getPos().y, context.player().getPos().z, stack);
-            context.player().getServerWorld().spawnEntity(itemEntity);
+            if(!player.isCreative()) {
+                int slot = player.getInventory().getSlotWithStack((new ItemStack(Items.MAP)));
+                if(slot != -1) {
+                    player.getInventory().getStack(slot).decrement(1);
+                    ItemEntity itemEntity = new ItemEntity(player.getServerWorld(), player.getPos().x, player.getPos().y, player.getPos().z, stack);
+                    player.getServerWorld().spawnEntity(itemEntity);
+                }
+            }
+            else {
+                ItemEntity itemEntity = new ItemEntity(player.getServerWorld(), player.getPos().x, player.getPos().y, player.getPos().z, stack);
+                player.getServerWorld().spawnEntity(itemEntity);
+            }
+
+
+
+
+
+
 
         });
     }
