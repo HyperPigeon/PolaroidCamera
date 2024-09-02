@@ -2,20 +2,22 @@ package net.hyper_pigeon.polaroidcamera;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.hyper_pigeon.polaroidcamera.items.CameraItem;
-import net.hyper_pigeon.polaroidcamera.networking.PolaroidCameraNetworkingConstants;
+import net.hyper_pigeon.polaroidcamera.networking.CreateMapStatePayload;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-
-import java.util.Objects;
 
 public class PolaroidCamera implements ModInitializer {
 
@@ -25,71 +27,27 @@ public class PolaroidCamera implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        Registry.register(Registries.ITEM,new Identifier("polaroidcamera", "camera"), CAMERA_ITEM);
+        Registry.register(Registries.ITEM,Identifier.of("polaroidcamera", "camera"), CAMERA_ITEM);
 
-        ItemGroupEvents
-                .modifyEntriesEvent(ItemGroups.TOOLS)
-                .register((itemGroup) -> itemGroup.add(PolaroidCamera.CAMERA_ITEM));
+//        ItemGroupEvents
+//                .modifyEntriesEvent(ItemGroups.TOOLS)
+//                .register((itemGroup) -> itemGroup.add(PolaroidCamera.CAMERA_ITEM));
+        PayloadTypeRegistry.playC2S().register(CreateMapStatePayload.PACKET_ID, CreateMapStatePayload.PACKET_CODEC);
 
-        ServerPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.CREATE_MAP_STATE, ((server, player, handler, buf, responseSender) -> {
+        ServerPlayNetworking.registerGlobalReceiver(CreateMapStatePayload.PACKET_ID, (payload, context) -> {
+            var world = context.player().getServerWorld();
+            NbtCompound nbtCompound = payload.imageNBT();
+            MapState mapState = MapState.fromNbt(nbtCompound,world.getRegistryManager());
 
-            server.execute(() -> {
-                int id = player.getEntityWorld().getNextMapId();
-                NbtCompound nbt = new NbtCompound();
-                nbt.putString("dimension", player.getEntityWorld().getRegistryKey().getValue().toString());
-                nbt.putInt("xCenter", (int) player.getX());
-                nbt.putInt("zCenter", (int) player.getZ());
-                nbt.putBoolean("locked", true);
-                nbt.putBoolean("unlimitedTracking", false);
-                nbt.putBoolean("trackingPosition", false);
-                nbt.putByte("scale", (byte) 3);
-                MapState state = MapState.fromNbt(nbt);
+            ItemStack stack = new ItemStack(Items.FILLED_MAP);
+            MapIdComponent mapIdComponent = world.increaseAndGetMapId();
+            context.player().getEntityWorld().putMapState(mapIdComponent,mapState);
+            stack.set(DataComponentTypes.MAP_ID, mapIdComponent);
 
-                //player.getEntityWorld().putMapState(FilledMapItem.getMapName(id), state);
+            ItemEntity itemEntity = new ItemEntity(context.player().getServerWorld(), context.player().getPos().x, context.player().getPos().y, context.player().getPos().z, stack);
+            context.player().getServerWorld().spawnEntity(itemEntity);
 
-                NbtCompound nbtCompound = new NbtCompound();
-                nbtCompound = state.writeNbt(nbtCompound);
-
-                PacketByteBuf packetByteBuf = PacketByteBufs.create();
-
-                packetByteBuf.writeInt(id);
-                packetByteBuf.writeNbt(nbtCompound);
-
-                ServerPlayNetworking.send(player,PolaroidCameraNetworkingConstants.CREATE_PICTURE,packetByteBuf);
-                });
-        }));
-
-        ServerPlayNetworking.registerGlobalReceiver(PolaroidCameraNetworkingConstants.SPAWN_PICTURE, ((server, player, handler, buf, responseSender) -> {
-
-            int mapId = buf.readInt();
-            MapState mapState = MapState.fromNbt(Objects.requireNonNull(buf.readNbt()));
-
-            server.execute(() -> {
-
-                ItemStack stack = new ItemStack(Items.FILLED_MAP);
-                player.getEntityWorld().putMapState(FilledMapItem.getMapName(mapId),mapState);
-                stack.getOrCreateNbt().putInt("map", mapId);
-
-                if(!player.isCreative()) {
-                    int slot = player.getInventory().getSlotWithStack((new ItemStack(Items.MAP)));
-                    if(slot != -1) {
-                        player.getInventory().getStack(slot).decrement(1);
-
-                        ItemEntity itemEntity = new ItemEntity(player.getServerWorld(), player.getPos().x, player.getPos().y, player.getPos().z, stack);
-                        player.getServerWorld().spawnEntity(itemEntity);
-                    }
-                }
-                else {
-                    ItemEntity itemEntity = new ItemEntity(player.getServerWorld(), player.getPos().x, player.getPos().y, player.getPos().z, stack);
-                    player.getServerWorld().spawnEntity(itemEntity);
-                }
-
-            });
-
-
-        }));
-
-
+        });
     }
 
 

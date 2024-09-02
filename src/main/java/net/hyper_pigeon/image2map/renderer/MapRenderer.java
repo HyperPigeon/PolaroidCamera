@@ -2,6 +2,7 @@ package net.hyper_pigeon.image2map.renderer;
 
 import net.hyper_pigeon.image2map.Image2Map;
 import net.minecraft.block.MapColor;
+import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
@@ -41,47 +42,47 @@ public class MapRenderer {
         return new double[] { color[0] * coeff, color[1] * coeff, color[2] * coeff };
     }
 
-    public static ItemStack render(BufferedImage image, Image2Map.DitherMode mode, ServerWorld world, double x, double z,
-                                   PlayerEntity player) {
-        // mojang removed the ability to set a map as locked via the "locked" field in
-        // 1.17, so we create and apply our own MapState instead
-        ItemStack stack = new ItemStack(Items.FILLED_MAP);
-        int id = world.getNextMapId();
-        NbtCompound nbt = new NbtCompound();
+//    public static ItemStack render(BufferedImage image, Image2Map.DitherMode mode, ServerWorld world, double x, double z,
+//                                   PlayerEntity player) {
+//        // mojang removed the ability to set a map as locked via the "locked" field in
+//        // 1.17, so we create and apply our own MapState instead
+//        ItemStack stack = new ItemStack(Items.FILLED_MAP);
+//        MapIdComponent id = world.increaseAndGetMapId();
+//        NbtCompound nbt = new NbtCompound();
+//
+//        nbt.putString("dimension", world.getRegistryKey().getValue().toString());
+//        nbt.putInt("xCenter", (int) x);
+//        nbt.putInt("zCenter", (int) z);
+//        nbt.putBoolean("locked", true);
+//        nbt.putBoolean("unlimitedTracking", false);
+//        nbt.putBoolean("trackingPosition", false);
+//        nbt.putByte("scale", (byte) 3);
+//        MapState state = MapState.fromNbt(nbt);
+//        world.putMapState(FilledMapItem.getMapName(id), state);
+//        stack.getOrCreateNbt().putInt("map", id);
+//
+//        Image resizedImage = image.getScaledInstance(128, 128, Image.SCALE_DEFAULT);
+//        BufferedImage resized = convertToBufferedImage(resizedImage);
+//        int width = resized.getWidth();
+//        int height = resized.getHeight();
+//        int[][] pixels = convertPixelArray(resized);
+//        MapColor[] mapColors = getColors();
+//        Color imageColor;
+//        mapColors = Arrays.stream(mapColors).filter(Objects::nonNull).toArray(MapColor[]::new);
+//
+//        for (int i = 0; i < width; i++) {
+//            for (int j = 0; j < height; j++) {
+//                imageColor = new Color(pixels[j][i], true);
+//                if (mode.equals(Image2Map.DitherMode.FLOYD))
+//                    state.colors[i + j * width] = (byte) floydDither(mapColors, pixels, i, j, imageColor);
+//                else
+//                    state.colors[i + j * width] = (byte) nearestColor(mapColors, imageColor);
+//            }
+//        }
+//        return stack;
+//    }
 
-        nbt.putString("dimension", world.getRegistryKey().getValue().toString());
-        nbt.putInt("xCenter", (int) x);
-        nbt.putInt("zCenter", (int) z);
-        nbt.putBoolean("locked", true);
-        nbt.putBoolean("unlimitedTracking", false);
-        nbt.putBoolean("trackingPosition", false);
-        nbt.putByte("scale", (byte) 3);
-        MapState state = MapState.fromNbt(nbt);
-        world.putMapState(FilledMapItem.getMapName(id), state);
-        stack.getOrCreateNbt().putInt("map", id);
-
-        Image resizedImage = image.getScaledInstance(128, 128, Image.SCALE_DEFAULT);
-        BufferedImage resized = convertToBufferedImage(resizedImage);
-        int width = resized.getWidth();
-        int height = resized.getHeight();
-        int[][] pixels = convertPixelArray(resized);
-        MapColor[] mapColors = getColors();
-        Color imageColor;
-        mapColors = Arrays.stream(mapColors).filter(Objects::nonNull).toArray(MapColor[]::new);
-
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                imageColor = new Color(pixels[j][i], true);
-                if (mode.equals(Image2Map.DitherMode.FLOYD))
-                    state.colors[i + j * width] = (byte) floydDither(mapColors, pixels, i, j, imageColor);
-                else
-                    state.colors[i + j * width] = (byte) nearestColor(mapColors, imageColor);
-            }
-        }
-        return stack;
-    }
-
-    public static MapState render(BufferedImage image, Image2Map.DitherMode mode, int id, MapState state) {
+    public static MapState render(BufferedImage image, Image2Map.DitherMode mode, MapState state) {
         // mojang removed the ability to set a map as locked via the "locked" field in
         // 1.17, so we create and apply our own MapState instead
 

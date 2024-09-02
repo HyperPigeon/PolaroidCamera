@@ -19,19 +19,4 @@ public class PolaroidCameraZoomUtil {
         screen.currentZoom = MathHelper.clamp(screen.currentZoom, 1, 50);
 
     }
-
-//    public static double getCameraFOV(CameraScreen screen){
-//        return screen.defaultFOV / screen.currentZoom;
-//    }
-
-
-
-//    public static void onMouseScroll(double amount){
-//        if(amount > 0)
-//            MC.options.getFov().setValue((int) (MC.options.getFov().getValue()*1.1));
-//        else if(amount < 0)
-//            MC.options.getFov().setValue((int) (MC.options.getFov().getValue()*0.9));
-//
-//        MC.options.getFov().setValue(MathHelper.clamp(MC.options.getFov().getValue(), 1, 100));
-//    }
 }
