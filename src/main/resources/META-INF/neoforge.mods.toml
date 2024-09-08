@@ -1,0 +1,41 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license="MIT"
+
+[[mods]]
+modId="polaroidcamera"
+version="1.8.1"
+displayName="Polaroid Camera"
+authors="CyborgPigeon"
+description='''A mod for Minecraft that adds a camera that takes pictures and puts them on maps.'''
+
+[properties]
+"connector:placeholder" = true
+
+[[dependencies.polaroidcamera]]
+modId = "connector"
+type = "required"
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.polaroidcamera]]
+modId = "neoforge"
+type = "required"
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.polaroidcamera]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${minecraft_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.polaroidcamera]]
+modId = "fabric_api"
+type = "required"
+versionRange = "[${fabric_version},)"
+ordering = "NONE"
+side = "BOTH"

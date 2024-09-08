@@ -3,7 +3,7 @@
   "id": "polaroidcamera",
   "version": "${version}",
   "name": "PolaroidCamera",
-  "description": "",
+  "description": "A mod for Minecraft that adds a camera that takes pictures and puts them on maps.",
   "authors": [],
   "contact": {},
   "license": "MIT",
