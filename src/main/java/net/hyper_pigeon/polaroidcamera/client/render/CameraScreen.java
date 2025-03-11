@@ -1,7 +1,6 @@
 package net.hyper_pigeon.polaroidcamera.client.render;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.hyper_pigeon.image2map.Image2Map;
 import net.hyper_pigeon.image2map.renderer.MapRenderer;
 import net.hyper_pigeon.polaroidcamera.client.PolaroidCameraClient;
@@ -13,9 +12,7 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
