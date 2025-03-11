@@ -1,6 +1,7 @@
 package net.hyper_pigeon.polaroidcamera;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -9,14 +10,12 @@ import net.hyper_pigeon.polaroidcamera.networking.CreateMapStatePayload;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class PolaroidCamera implements ModInitializer {
@@ -24,14 +23,19 @@ public class PolaroidCamera implements ModInitializer {
 
     public static final CameraItem CAMERA_ITEM = new CameraItem(new Item.Settings().maxCount(1));
 
+    public static final ItemGroup POLAROID_CAMERA_GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of("polaroidcamera", "polaroidcamera_group"), FabricItemGroup.builder()
+            .icon(() -> new ItemStack(CAMERA_ITEM))
+            .displayName(Text.translatable("itemGroup.polaroidcamera.polaroidcamera_group"))
+            .entries((context, entries) -> {
+                entries.add(CAMERA_ITEM);
+            })
+            .build());
+
     @Override
     public void onInitialize() {
 
         Registry.register(Registries.ITEM,Identifier.of("polaroidcamera", "camera"), CAMERA_ITEM);
 
-//        ItemGroupEvents
-//                .modifyEntriesEvent(ItemGroups.TOOLS)
-//                .register((itemGroup) -> itemGroup.add(PolaroidCamera.CAMERA_ITEM));
         PayloadTypeRegistry.playC2S().register(CreateMapStatePayload.PACKET_ID, CreateMapStatePayload.PACKET_CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(CreateMapStatePayload.PACKET_ID, (payload, context) -> {
