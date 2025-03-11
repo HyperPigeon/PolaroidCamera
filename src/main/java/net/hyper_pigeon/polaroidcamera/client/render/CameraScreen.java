@@ -15,6 +15,7 @@ import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
@@ -29,6 +30,8 @@ public class CameraScreen extends Screen {
     public double currentZoom;
     private final World world;
 
+    private boolean takePicture = false;
+
     public CameraScreen(double fov, World world) {
         super(NarratorManager.EMPTY);
         defaultFOV = fov;
@@ -38,12 +41,11 @@ public class CameraScreen extends Screen {
     }
 
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.client.options.hudHidden = true;
 //        super.render(context, mouseX, mouseY, delta);
-    }
+//        this.client.options.hudHidden = true;
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers){
-        if(PolaroidCameraClient.TAKE_PICTURE_KEY.matchesKey(keyCode,scanCode)){
+        if(takePicture) {
+            takePicture = false;
             NativeImage nativeImage = ScreenshotRecorder.takeScreenshot(client.getFramebuffer());
             byte[] imageBytes;
             BufferedImage bufferedImage;
@@ -65,6 +67,35 @@ public class CameraScreen extends Screen {
             mapState.writeNbt(nbtCompound,manager);
             CreateMapStatePayload createMapStatePayload = new CreateMapStatePayload(nbtCompound);
             ClientPlayNetworking.send(createMapStatePayload);
+            this.close();
+        }
+        else {
+            int width = context.getScaledWindowWidth();
+            int height = context.getScaledWindowHeight();
+            drawViewFinder(context, context.getScaledWindowHeight()/2 - 10, 10, width - context.getScaledWindowHeight()/2 + 10, height - 10, 2, 30);
+        }
+
+
+    }
+
+    // Code copied from a much better camera mod: https://github.com/chrrs/camerapture/blob/1.21.4/common/src/client/java/me/chrr/camerapture/gui/CameraViewFinder.java
+    private static void drawViewFinder(DrawContext context, int x1, int y1, int x2, int y2, int thickness, int length) {
+        context.fill(x1, y1, x1 + length, y1 + thickness, 0xffffffff);
+        context.fill(x1, y1, x1 + thickness, y1 + length, 0xffffffff);
+
+        context.fill(x2 - length, y1, x2, y1 + thickness, 0xffffffff);
+        context.fill(x2 - thickness, y1, x2, y1 + length, 0xffffffff);
+
+        context.fill(x1, y2 - thickness, x1 + length, y2, 0xffffffff);
+        context.fill(x1, y2 - length, x1 + thickness, y2, 0xffffffff);
+
+        context.fill(x2 - length, y2 - thickness, x2, y2, 0xffffffff);
+        context.fill(x2 - thickness, y2 - length, x2, y2, 0xffffffff);
+    }
+
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers){
+        if(PolaroidCameraClient.TAKE_PICTURE_KEY.matchesKey(keyCode,scanCode)){
+            takePicture = true;
         }
         if(keyCode == GLFW.GLFW_KEY_W){
             this.client.player.setPitch(this.client.player.getPitch()- 1);
