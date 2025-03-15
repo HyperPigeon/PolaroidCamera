@@ -5,6 +5,7 @@ import net.hyper_pigeon.image2map.Image2Map;
 import net.hyper_pigeon.image2map.renderer.MapRenderer;
 import net.hyper_pigeon.polaroidcamera.client.PolaroidCameraClient;
 import net.hyper_pigeon.polaroidcamera.networking.CreateMapStatePayload;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.NativeImage;
@@ -70,13 +71,14 @@ public class CameraScreen extends Screen {
             int width = context.getScaledWindowWidth();
             int height = context.getScaledWindowHeight();
             drawViewFinder(context, context.getScaledWindowHeight()/2 - 10, 10, width - context.getScaledWindowHeight()/2 + 10, height - 10, 2, 30);
+            drawZoomBar(context,textRenderer, width - 10, height / 2 - height / 6, height / 3);
         }
 
 
     }
 
     // Code copied from a much better camera mod: https://github.com/chrrs/camerapture/blob/1.21.4/common/src/client/java/me/chrr/camerapture/gui/CameraViewFinder.java
-    private static void drawViewFinder(DrawContext context, int x1, int y1, int x2, int y2, int thickness, int length) {
+    private void drawViewFinder(DrawContext context, int x1, int y1, int x2, int y2, int thickness, int length) {
         context.fill(x1, y1, x1 + length, y1 + thickness, 0xffffffff);
         context.fill(x1, y1, x1 + thickness, y1 + length, 0xffffffff);
 
@@ -88,6 +90,22 @@ public class CameraScreen extends Screen {
 
         context.fill(x2 - length, y2 - thickness, x2, y2, 0xffffffff);
         context.fill(x2 - thickness, y2 - length, x2, y2, 0xffffffff);
+    }
+
+    private void drawZoomBar(DrawContext context, TextRenderer textRenderer, int x, int y, int height) {
+        int ticks = height / 10;
+        for (int i = 0; i < ticks; i++) {
+            int ty = y + (height * i) / (ticks - 1);
+            context.fill(x - 6, ty, x, ty + 1, 0xafffffff);
+        }
+
+        float zoomProgress = 1f - (float) (this.currentZoom - 1) / (50 - 1);
+        int ty = y + (int) ((float) height * zoomProgress);
+        context.fill(x - 10, ty - 1, x, ty + 1, 0xffffffff);
+
+//        String zoomLevel = String.format("%.1fx", (float)this.client.options.getFov().getValue());
+//        int textWidth = textRenderer.getWidth(zoomLevel);
+//        context.drawText(textRenderer, zoomLevel, x - 12 - textWidth, ty - 4, 0xffffffff, false);
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers){
