@@ -13,13 +13,14 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class CameraScreen extends Screen {
@@ -44,27 +45,25 @@ public class CameraScreen extends Screen {
 
         if(takePicture) {
             takePicture = false;
-            NativeImage nativeImage = ScreenshotRecorder.takeScreenshot(client.getFramebuffer());
-            byte[] imageBytes;
-            BufferedImage bufferedImage;
-            try {
-                imageBytes = nativeImage.getBytes();
+            ScreenshotRecorder.takeScreenshot(client.getFramebuffer(), nativeImage -> {
+                BufferedImage bufferedImage;
+                try {
+                    bufferedImage = new BufferedImage(nativeImage.getWidth(), nativeImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                    bufferedImage.setRGB(0, 0, nativeImage.getWidth(), nativeImage.getHeight(), nativeImage.copyPixelsArgb(), 0, nativeImage.getWidth());
+                    bufferedImage = this.crop(bufferedImage, bufferedImage.getHeight(), bufferedImage.getHeight());
 
-                bufferedImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
-                bufferedImage = this.crop(bufferedImage, bufferedImage.getHeight(), bufferedImage.getHeight());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+                byte scale = 0;
+                MapState mapState = MapRenderer.render(bufferedImage, Image2Map.DitherMode.FLOYD, MapState.of(scale,true,this.client.world.getRegistryKey()));
 
-            byte scale = 0;
-            MapState mapState = MapRenderer.render(bufferedImage, Image2Map.DitherMode.FLOYD, MapState.of(scale,true,this.client.world.getRegistryKey()));
-
-            NbtCompound nbtCompound = new NbtCompound();
-            DynamicRegistryManager manager = world.getRegistryManager();
-            mapState.writeNbt(nbtCompound,manager);
-            CreateMapStatePayload createMapStatePayload = new CreateMapStatePayload(nbtCompound);
-            ClientPlayNetworking.send(createMapStatePayload);
+                DynamicRegistryManager manager = world.getRegistryManager();
+                NbtElement encoded = MapState.CODEC.encodeStart(manager.getOps(NbtOps.INSTANCE), mapState).getOrThrow();
+                CreateMapStatePayload createMapStatePayload = new CreateMapStatePayload((NbtCompound) encoded);
+                ClientPlayNetworking.send(createMapStatePayload);
+            });
             this.close();
         }
         else {

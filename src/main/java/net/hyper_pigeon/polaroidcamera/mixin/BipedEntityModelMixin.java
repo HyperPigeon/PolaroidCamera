@@ -1,9 +1,9 @@
 package net.hyper_pigeon.polaroidcamera.mixin;
 
-import net.hyper_pigeon.polaroidcamera.PolaroidCamera;
+import net.hyper_pigeon.polaroidcamera.duck.CameraHolder;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.render.entity.state.BipedEntityRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,8 +23,8 @@ public abstract class BipedEntityModelMixin {
     public ModelPart leftArm;
 
     @Inject(at = @At("TAIL"), method = "positionLeftArm")
-    private void cameraLeftArmPoses(LivingEntity livingEntity, CallbackInfo ci){
-        if(livingEntity.getMainHandStack().getItem() == PolaroidCamera.CAMERA_ITEM) {
+    private void cameraLeftArmPoses(BipedEntityRenderState state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
+        if(((CameraHolder) state).isHoldingCamera()) {
             leftArm.roll = 0;
             leftArm.yaw = 0.16F + this.head.yaw + 0.4F;
             leftArm.pitch = -1.5707964F + this.head.pitch;
@@ -32,8 +32,8 @@ public abstract class BipedEntityModelMixin {
     }
 
     @Inject(at = @At("TAIL"), method = "positionRightArm")
-    private void cameraRightArmPoses(LivingEntity livingEntity, CallbackInfo ci){
-        if(livingEntity.getMainHandStack().getItem() == PolaroidCamera.CAMERA_ITEM) {
+    private void cameraRightArmPoses(BipedEntityRenderState state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
+        if(((CameraHolder) state).isHoldingCamera()) {
             rightArm.roll = 0;
             rightArm.yaw =  -0.1F + this.head.yaw;;
             rightArm.pitch = -1.5707964F + this.head.pitch;

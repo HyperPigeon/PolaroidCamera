@@ -9,7 +9,9 @@
     "BipedEntityModelMixin",
     "InGameHudMixin",
     "MouseMixin",
-    "GameRendererMixin"
+    "GameRendererMixin",
+    "LivingEntityRenderStateMixin",
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -16,14 +16,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class GameRendererMixin {
 
 
-    @Inject(method = "getFov(Lnet/minecraft/client/render/Camera;FZ)D", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getFov(Lnet/minecraft/client/render/Camera;FZ)F", at = @At("RETURN"), cancellable = true)
     private void onGetFov(Camera camera, float tickDelta, boolean changingFov,
-                          CallbackInfoReturnable<Double> cir) {
+                          CallbackInfoReturnable<Float> cir) {
         if(PolaroidCameraZoomUtil.MC.currentScreen instanceof CameraScreen) {
             CameraScreen cameraScreen = (CameraScreen) PolaroidCameraZoomUtil.MC.currentScreen;
-            double fov = cir.getReturnValue();
+            float fov = cir.getReturnValue();
 
-            cir.setReturnValue(fov/cameraScreen.currentZoom);
+            cir.setReturnValue((float) (fov/cameraScreen.currentZoom));
         }
     }
 
