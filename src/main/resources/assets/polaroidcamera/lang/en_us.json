@@ -1,5 +1,6 @@
 {
   "item.polaroidcamera.camera":"Camera",
   "key.polaroidcamera.take_picture": "Take Picture",
+  "key.category.polaroidcamera.polaroid_camera": "Polaroid Camera",
   "itemGroup.polaroidcamera.polaroidcamera_group": "Polaroid Camera"
 }

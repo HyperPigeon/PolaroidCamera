@@ -23,7 +23,7 @@ public abstract class BipedEntityModelMixin {
     public ModelPart leftArm;
 
     @Inject(at = @At("TAIL"), method = "positionLeftArm")
-    private void cameraLeftArmPoses(BipedEntityRenderState state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
+    private void cameraLeftArmPoses(BipedEntityRenderState state, CallbackInfo ci){
         if(((CameraHolder) state).isHoldingCamera()) {
             leftArm.roll = 0;
             leftArm.yaw = 0.16F + this.head.yaw + 0.4F;
@@ -32,7 +32,7 @@ public abstract class BipedEntityModelMixin {
     }
 
     @Inject(at = @At("TAIL"), method = "positionRightArm")
-    private void cameraRightArmPoses(BipedEntityRenderState state, BipedEntityModel.ArmPose armPose, CallbackInfo ci){
+    private void cameraRightArmPoses(BipedEntityRenderState state, CallbackInfo ci){
         if(((CameraHolder) state).isHoldingCamera()) {
             rightArm.roll = 0;
             rightArm.yaw =  -0.1F + this.head.yaw;;

@@ -8,7 +8,7 @@ import net.hyper_pigeon.polaroidcamera.networking.CreateMapStatePayload;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.item.map.MapState;
@@ -19,7 +19,6 @@ import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -107,8 +106,9 @@ public class CameraScreen extends Screen {
 //        context.drawText(textRenderer, zoomLevel, x - 12 - textWidth, ty - 4, 0xffffffff, false);
     }
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers){
-        if(PolaroidCameraClient.TAKE_PICTURE_KEY.matchesKey(keyCode,scanCode)){
+    public boolean keyPressed(KeyInput input){
+        int keyCode = input.getKeycode();
+        if(PolaroidCameraClient.TAKE_PICTURE_KEY.matchesKey(input)){
             takePicture = true;
         }
         if(keyCode == GLFW.GLFW_KEY_W){
@@ -123,7 +123,7 @@ public class CameraScreen extends Screen {
         if(keyCode ==  GLFW.GLFW_KEY_A){
             this.client.player.setYaw(this.client.player.getYaw()-1);
         }
-        return super.keyPressed(keyCode,scanCode,modifiers);
+        return super.keyPressed(input);
     }
 
 
@@ -137,7 +137,8 @@ public class CameraScreen extends Screen {
         super.close();
     }
 
-    public void renderInGameBackground(DrawContext context) {
+    // override renderBackground to prevent dimming effect
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
 
     }
 
