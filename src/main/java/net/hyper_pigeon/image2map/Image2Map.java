@@ -7,15 +7,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.server.command.ServerCommandSource;
-
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.commands.CommandSourceStack;
 
 public class Image2Map {
-    class DitherModeSuggestionProvider implements SuggestionProvider<ServerCommandSource> {
+    class DitherModeSuggestionProvider implements SuggestionProvider<CommandSourceStack> {
 
         @Override
-        public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context,
+        public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context,
                                                              SuggestionsBuilder builder) throws CommandSyntaxException {
             builder.suggest("none");
             builder.suggest("dither");

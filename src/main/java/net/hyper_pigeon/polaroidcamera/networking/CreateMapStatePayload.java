@@ -1,29 +1,29 @@
 package net.hyper_pigeon.polaroidcamera.networking;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record CreateMapStatePayload(NbtCompound imageNBT) implements CustomPayload {
-    public static final CustomPayload.Id<CreateMapStatePayload> PACKET_ID = new CustomPayload.Id<>(PolaroidCameraNetworkingConstants.CREATE_MAP_STATE);
-    public static final PacketCodec<RegistryByteBuf, CreateMapStatePayload> PACKET_CODEC = CustomPayload.codecOf(CreateMapStatePayload::write,CreateMapStatePayload::new);
+public record CreateMapStatePayload(CompoundTag imageNBT) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<CreateMapStatePayload> PACKET_ID = new CustomPacketPayload.Type<>(PolaroidCameraNetworkingConstants.CREATE_MAP_STATE);
+    public static final StreamCodec<RegistryFriendlyByteBuf, CreateMapStatePayload> PACKET_CODEC = CustomPacketPayload.codec(CreateMapStatePayload::write,CreateMapStatePayload::new);
 
-        private CreateMapStatePayload(PacketByteBuf buf) {
+        private CreateMapStatePayload(FriendlyByteBuf buf) {
         this(buf.readNbt());
     }
 
-    public CreateMapStatePayload(NbtCompound imageNBT) {
+    public CreateMapStatePayload(CompoundTag imageNBT) {
         this.imageNBT = imageNBT;
     }
 
-    private void write(RegistryByteBuf registryByteBuf) {
+    private void write(RegistryFriendlyByteBuf registryByteBuf) {
         registryByteBuf.writeNbt(imageNBT);
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return PACKET_ID;
     }
 }

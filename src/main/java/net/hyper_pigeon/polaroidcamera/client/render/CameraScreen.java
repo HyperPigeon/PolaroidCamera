@@ -5,18 +5,18 @@ import net.hyper_pigeon.image2map.Image2Map;
 import net.hyper_pigeon.image2map.renderer.MapRenderer;
 import net.hyper_pigeon.polaroidcamera.client.PolaroidCameraClient;
 import net.hyper_pigeon.polaroidcamera.networking.CreateMapStatePayload;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.ScreenshotRecorder;
-import net.minecraft.item.map.MapState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Screenshot;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.world.World;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.image.BufferedImage;
@@ -26,57 +26,71 @@ public class CameraScreen extends Screen {
     public final double defaultFOV;
     public double currentFOV;
     public double currentZoom;
-    private final World world;
+    private final Level world;
 
     private boolean takePicture = false;
+    private boolean pendingCapture = false;
 
-    public CameraScreen(double fov, World world) {
-        super(NarratorManager.EMPTY);
+    public CameraScreen(double fov, Level world) {
+        super(GameNarrator.NO_TITLE);
         defaultFOV = fov;
         currentFOV = defaultFOV;
         currentZoom = 1;
         this.world = world;
     }
 
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 //        super.render(context, mouseX, mouseY, delta);
 //        this.client.options.hudHidden = true;
 
+        // First phase: on the frame the picture is requested, stop drawing the viewfinder/zoom
+        // bar and defer the capture to the next frame. This guarantees the overlay (and the
+        // HUD/held item hidden by the mixins) is absent from the framebuffer we grab, regardless
+        // of 26.x's deferred/retained-mode GUI compositing timing.
         if(takePicture) {
             takePicture = false;
-            ScreenshotRecorder.takeScreenshot(client.getFramebuffer(), nativeImage -> {
+            pendingCapture = true;
+            return;
+        }
+
+        if(pendingCapture) {
+            pendingCapture = false;
+            Screenshot.takeScreenshot(minecraft.gameRenderer.mainRenderTarget(), nativeImage -> {
                 BufferedImage bufferedImage;
                 try {
                     bufferedImage = new BufferedImage(nativeImage.getWidth(), nativeImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                    bufferedImage.setRGB(0, 0, nativeImage.getWidth(), nativeImage.getHeight(), nativeImage.copyPixelsArgb(), 0, nativeImage.getWidth());
+                    bufferedImage.setRGB(0, 0, nativeImage.getWidth(), nativeImage.getHeight(), nativeImage.getPixels(), 0, nativeImage.getWidth());
                     bufferedImage = this.crop(bufferedImage, bufferedImage.getHeight(), bufferedImage.getHeight());
 
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+                finally {
+                    nativeImage.close();
+                }
 
                 byte scale = 0;
-                MapState mapState = MapRenderer.render(bufferedImage, Image2Map.DitherMode.FLOYD, MapState.of(scale,true,this.client.world.getRegistryKey()));
+                MapItemSavedData mapState = MapRenderer.render(bufferedImage, Image2Map.DitherMode.FLOYD, MapItemSavedData.createForClient(scale,true,this.minecraft.level.dimension()));
 
-                DynamicRegistryManager manager = world.getRegistryManager();
-                NbtElement encoded = MapState.CODEC.encodeStart(manager.getOps(NbtOps.INSTANCE), mapState).getOrThrow();
-                CreateMapStatePayload createMapStatePayload = new CreateMapStatePayload((NbtCompound) encoded);
+                RegistryAccess manager = world.registryAccess();
+                Tag encoded = MapItemSavedData.CODEC.encodeStart(manager.createSerializationContext(NbtOps.INSTANCE), mapState).getOrThrow();
+                CreateMapStatePayload createMapStatePayload = new CreateMapStatePayload((CompoundTag) encoded);
                 ClientPlayNetworking.send(createMapStatePayload);
             });
-            this.close();
+            this.onClose();
+            return;
         }
-        else {
-            int width = context.getScaledWindowWidth();
-            int height = context.getScaledWindowHeight();
-            drawViewFinder(context, context.getScaledWindowHeight()/2 - 10, 10, width - context.getScaledWindowHeight()/2 + 10, height - 10, 2, 30);
-            drawZoomBar(context,textRenderer, width - 10, height / 2 - height / 6, height / 3);
-        }
+
+        int width = context.guiWidth();
+        int height = context.guiHeight();
+        drawViewFinder(context, context.guiHeight()/2 - 10, 10, width - context.guiHeight()/2 + 10, height - 10, 2, 30);
+        drawZoomBar(context,font, width - 10, height / 2 - height / 6, height / 3);
 
 
     }
 
     // Code copied from a much better camera mod: https://github.com/chrrs/camerapture/blob/1.21.4/common/src/client/java/me/chrr/camerapture/gui/CameraViewFinder.java
-    private void drawViewFinder(DrawContext context, int x1, int y1, int x2, int y2, int thickness, int length) {
+    private void drawViewFinder(GuiGraphicsExtractor context, int x1, int y1, int x2, int y2, int thickness, int length) {
         context.fill(x1, y1, x1 + length, y1 + thickness, 0xffffffff);
         context.fill(x1, y1, x1 + thickness, y1 + length, 0xffffffff);
 
@@ -90,7 +104,7 @@ public class CameraScreen extends Screen {
         context.fill(x2 - thickness, y2 - length, x2, y2, 0xffffffff);
     }
 
-    private void drawZoomBar(DrawContext context, TextRenderer textRenderer, int x, int y, int height) {
+    private void drawZoomBar(GuiGraphicsExtractor context, Font textRenderer, int x, int y, int height) {
         int ticks = height / 10;
         for (int i = 0; i < ticks; i++) {
             int ty = y + (height * i) / (ticks - 1);
@@ -106,39 +120,38 @@ public class CameraScreen extends Screen {
 //        context.drawText(textRenderer, zoomLevel, x - 12 - textWidth, ty - 4, 0xffffffff, false);
     }
 
-    public boolean keyPressed(KeyInput input){
-        int keyCode = input.getKeycode();
-        if(PolaroidCameraClient.TAKE_PICTURE_KEY.matchesKey(input)){
+    public boolean keyPressed(KeyEvent input){
+        int keyCode = input.input();
+        if(PolaroidCameraClient.TAKE_PICTURE_KEY.matches(input)){
             takePicture = true;
         }
         if(keyCode == GLFW.GLFW_KEY_W){
-            this.client.player.setPitch(this.client.player.getPitch()- 1);
+            this.minecraft.player.setXRot(this.minecraft.player.getXRot()- 1);
         }
         if(keyCode ==  GLFW.GLFW_KEY_S){
-            this.client.player.setPitch(this.client.player.getPitch()+ 1);
+            this.minecraft.player.setXRot(this.minecraft.player.getXRot()+ 1);
         }
         if(keyCode ==  GLFW.GLFW_KEY_D){
-            this.client.player.setYaw(this.client.player.getYaw()+1);
+            this.minecraft.player.setYRot(this.minecraft.player.getYRot()+1);
         }
         if(keyCode ==  GLFW.GLFW_KEY_A){
-            this.client.player.setYaw(this.client.player.getYaw()-1);
+            this.minecraft.player.setYRot(this.minecraft.player.getYRot()-1);
         }
         return super.keyPressed(input);
     }
 
 
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
-    public void close() {
-        this.client.options.hudHidden = false;
-        this.client.options.getFov().setValue((int) defaultFOV);
-        super.close();
+    public void onClose() {
+        this.minecraft.options.fov().set((int) defaultFOV);
+        super.onClose();
     }
 
-    // override renderBackground to prevent dimming effect
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+    // override extractBackground to prevent the screen dimming effect (26.x retained-mode)
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
     }
 

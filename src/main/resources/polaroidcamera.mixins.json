@@ -9,6 +9,7 @@
     "BipedEntityModelMixin",
     "InGameHudMixin",
     "MouseMixin",
+    "CameraMixin",
     "GameRendererMixin",
     "LivingEntityRenderStateMixin",
     "LivingEntityRendererMixin"

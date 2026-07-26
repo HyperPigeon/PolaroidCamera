@@ -3,35 +3,33 @@ package net.hyper_pigeon.polaroidcamera.items;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.hyper_pigeon.polaroidcamera.client.render.CameraScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 
 public class CameraItem extends Item {
-    public CameraItem(Settings settings) {
+    public CameraItem(Properties settings) {
         super(settings);
     }
 
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
 
 
-        if (world.isClient()){
+        if (world.isClientSide()){
             openCameraScreen(world,user,hand);
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Environment(EnvType.CLIENT)
-    private void openCameraScreen(World world, PlayerEntity user, Hand hand) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (!(mc.currentScreen instanceof CameraScreen)) {
-            mc.options.hudHidden = true;
-            mc.setScreen(new CameraScreen(mc.options.getFov().getValue(), world));
+    private void openCameraScreen(Level world, Player user, InteractionHand hand) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!(mc.gui.screen() instanceof CameraScreen)) {
+            mc.gui.setScreen(new CameraScreen(mc.options.fov().get(), world));
         }
-        mc.options.hudHidden = true;
     }
 }
