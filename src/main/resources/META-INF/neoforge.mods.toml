@@ -4,7 +4,7 @@ license="MIT"
 
 [[mods]]
 modId="polaroidcamera"
-version="1.10.0"
+version="1.11.0"
 displayName="Polaroid Camera"
 authors="CyborgPigeon"
 description='''A mod for Minecraft that adds a camera that takes pictures and puts them on maps.'''
